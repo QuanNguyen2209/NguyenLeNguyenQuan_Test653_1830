@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECC Cipher Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body { background: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .main-card {
+            margin-top: 40px; padding: 30px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); background: white; border: none;
+        }
+        .section-title { color: #dc3545; font-weight: 700; margin-top: 20px; text-transform: uppercase; font-size: 0.9rem; }
+        .result-box {
+            margin-top: 15px; padding: 15px; border-radius: 8px; background: #e9ecef;
+            border: 2px dashed #ced4da; font-family: 'Courier New', Courier, monospace;
+            font-weight: bold; word-wrap: break-word; min-height: 50px;
+        }
+        .btn-action { font-weight: bold; letter-spacing: 1px; padding: 10px 25px; }
+        label { font-weight: 600; color: #495057; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="mt-4">
+                    <a href="/" class="btn btn-secondary btn-sm">🏠 Quay lại Trang chủ</a>
+                </div>
+
+                <div class="main-card mt-3">
+                    <h2 class="text-center mb-2" style="color: #dc3545;">ELLIPTIC CURVE CRYPTOGRAPHY</h2>
+                    <p class="text-center text-muted small mb-4">Mật mã Đường cong Elliptic (ECC)</p>
+                    <hr>
+
+                    <div class="section-title">🔒 Encryption (Mã hóa)</div>
+                    <div class="form-group mt-3">
+                        <label>Plaintext</label>
+                        <textarea id="plainText" class="form-control" rows="2" placeholder="Nhập bản rõ tại đây..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Public Key (Khóa công khai)</label>
+                        <input id="keyEncrypt" type="text" class="form-control" placeholder="Nhập khóa mã hóa...">
+                    </div>
+                    <button class="btn btn-danger btn-action" onclick="encryptECC()">ENCRYPT</button>
+                    
+                    <div class="result-label mt-3 small text-muted">Result:</div>
+                    <div id="encryptResult" class="result-box">Chờ xử lý...</div>
+
+                    <hr class="mt-4">
+
+                    <div class="section-title">🔓 Decryption (Giải mã)</div>
+                    <div class="form-group mt-3">
+                        <label>Ciphertext</label>
+                        <textarea id="cipherText" class="form-control" rows="2" placeholder="Nhập bản mã tại đây..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Private Key (Khóa bí mật)</label>
+                        <input id="keyDecrypt" type="text" class="form-control" placeholder="Nhập khóa giải mã...">
+                    </div>
+                    <button class="btn btn-warning btn-action text-white" onclick="decryptECC()">DECRYPT</button>
+                    
+                    <div class="result-label mt-3 small text-muted">Result:</div>
+                    <div id="decryptResult" class="result-box">Chờ xử lý...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function encryptECC() {
+            const text = document.getElementById("plainText").value;
+            const key = document.getElementById("keyEncrypt").value;
+            if(!text) { alert("Vui lòng nhập văn bản!"); return; }
+
+            fetch("/ecc/encrypt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text, key: key })
+            }).then(res => res.json()).then(data => {
+                document.getElementById("encryptResult").innerText = data.result;
+                // Tự động copy xuống dưới để test cho lẹ
+                document.getElementById("cipherText").value = data.result; 
+                document.getElementById("keyDecrypt").value = key;
+            }).catch(err => { document.getElementById("encryptResult").innerText = "Lỗi kết nối Server!"; });
+        }
+
+        function decryptECC() {
+            const text = document.getElementById("cipherText").value;
+            const key = document.getElementById("keyDecrypt").value;
+            if(!text) { alert("Vui lòng nhập bản mã!"); return; }
+
+            fetch("/ecc/decrypt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text, key: key })
+            }).then(res => res.json()).then(data => {
+                document.getElementById("decryptResult").innerText = data.result;
+            }).catch(err => { document.getElementById("decryptResult").innerText = "Lỗi kết nối Server!"; });
+        }
+    </script>
+</body>
+</html>
